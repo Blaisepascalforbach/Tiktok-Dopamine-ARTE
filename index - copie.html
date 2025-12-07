@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioHacking : Réseaux & IA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* --- CHARTE GRAPHIQUE "CYBERPUNK / GAMING" --- */
+        :root {
+            --primary: #6200EA; 
+            --accent: #00E5FF; /* Cyan électrique */
+            --danger: #FF0050; /* Rouge TikTok */
+            --success: #00C853;
+            --bg: #121212;
+            --card: #1e1e24;
+            --text: #ffffff;
+            --text-muted: #b0b0b0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Montserrat', sans-serif; }
+
+        /* --- HEADER --- */
+        header {
+            background: rgba(30, 30, 36, 0.95);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid var(--accent);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0,229,255,0.1);
+        }
+        header h1 { margin: 0; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; font-size: 1.4rem; }
+        header span { color: var(--accent); }
+
+        .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
+
+        /* --- SECTIONS --- */
+        section {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 40px;
+            border: 1px solid #333;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+        }
+        h2 { color: var(--accent); font-size: 1.3rem; margin: 0; }
+        .section-icon { font-size: 1.5rem; }
+
+        /* --- BOUTONS GÉNÉRIQUES --- */
+        .btn-choice {
+            width: 100%;
+            padding: 15px;
+            margin: 8px 0;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background: #2a2a35;
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: left;
+        }
+        .btn-choice:hover { border-color: var(--accent); background: #333; transform: translateX(5px); }
+
+        .feedback { 
+            display: none; margin-top: 15px; padding: 15px; border-radius: 8px; font-size: 0.9rem; 
+            background: rgba(255, 255, 255, 0.05); border-left: 4px solid var(--text);
+            animation: slideDown 0.3s ease;
+        }
+
+        /* --- PARTIE 1 : VIDÉO & CARDS --- */
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+        .time-deck { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: thin; }
+        .time-card {
+            min-width: 180px;
+            background: linear-gradient(145deg, #2a2a35, #1e1e24);
+            border: 1px solid #444;
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .time-card:hover { border-color: var(--danger); transform: translateY(-3px); }
+        .time-card h4 { margin: 0 0 5px 0; font-size: 0.9rem; color: #fff; }
+        .time-card span { font-size: 0.75rem; background: var(--danger); color: white; padding: 2px 6px; border-radius: 4px; }
+
+        /* --- PARTIE 1 : SIMULATEUR ALGO --- */
+        .algo-simulator { background: #000; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #333; }
+        .btn-algo { width: 48%; display: inline-block; background: #333; border: 1px solid #555; padding: 10px; color: white; cursor: pointer; border-radius: 6px; font-size: 0.85rem; }
+        .btn-algo:hover { background: #444; }
+
+        /* --- PARTIE 1 : JEU DE TRI --- */
+        .game-area { text-align: center; margin-top: 20px; }
+        .card-stack { height: 80px; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
+        .term-card {
+            background: white; color: var(--primary); padding: 15px 30px; border-radius: 30px; 
+            font-weight: 800; font-size: 1.1rem; box-shadow: 0 0 15px var(--primary); cursor: pointer;
+            animation: popIn 0.3s;
+        }
+        .targets { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .target-box {
+            flex: 1; min-width: 120px; border: 1px dashed #666; border-radius: 10px; padding: 10px; 
+            cursor: pointer; background: rgba(255,255,255,0.05); transition: 0.2s;
+        }
+        .target-box:hover { background: rgba(255,255,255,0.1); border-color: var(--accent); }
+        .target-box h4 { margin: 0; font-size: 0.8rem; color: #aaa; pointer-events: none; }
+
+        /* --- TRANSITION --- */
+        .transition-block { text-align: center; padding: 40px 0; }
+        .transition-line { height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); width: 100%; margin-bottom: 20px; }
+        
+        /* --- PARTIE 2 : IA --- */
+        .prediction-game { font-family: 'Courier New', monospace; background: #111; padding: 15px; border-radius: 8px; border: 1px solid var(--success); }
+        .word-options { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-word { flex: 1; background: #222; border: 1px solid var(--success); color: var(--success); padding: 10px; cursor: pointer; }
+
+        .chat-box { background: #e0e0e0; border-radius: 12px; padding: 15px; color: #333; height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-family: sans-serif; }
+        .msg { padding: 8px 12px; border-radius: 12px; max-width: 85%; font-size: 0.9rem; }
+        .msg-ai { background: #fff; align-self: flex-start; border: 1px solid #ccc; }
+        .msg-user { background: var(--primary); color: white; align-self: flex-end; }
+
+        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Code<span>Breaker</span></h1>
+    <div style="font-size: 0.8rem; opacity: 0.8;">Module : Réseaux Sociaux & Intelligence Artificielle</div>
+</header>
+
+<div class="container">
+
+    <section id="step1">
+        <div class="section-header">
+            <span class="section-icon">⚡</span>
+            <h2>Crash Test : La Dopamine</h2>
+        </div>
+        <p>Tu as un contrôle demain, mais tu es sur ton téléphone depuis 1h à scroller des vidéos nulles. Pourquoi tu n'arrêtes pas ?</p>
+        
+        <button class="btn-choice" onclick="checkIntro(1)">Parce que je cherche une info importante.</button>
+        <button class="btn-choice" onclick="checkIntro(2)">Parce que mon cerveau est "hacké" par la récompense.</button>
+
+        <div id="intro-feedback" class="feedback"></div>
+    </section>
+
+    <section id="step2">
+        <div class="section-header">
+            <span class="section-icon">🧠</span>
+            <h2>L'Investigation (Vidéo)</h2>
+        </div>
+        <p>Regarde comment les ingénieurs utilisent ta biologie. Clique sur les boutons pour aller aux preuves.</p>
+        
+        <div class="video-wrapper">
+            <iframe id="video-player" 
+                src="https://www.youtube.com/embed/-pOWdBpVR3s?enablejsapi=1" 
+                title="YouTube video player" frameborder="0" allowfullscreen>
+            </iframe>
+        </div>
+
+        <div class="time-deck">
+            <div class="time-card" onclick="seekVideo(57)">
+                <h4>💊 La Dopamine</h4>
+                <p style="font-size:0.75rem; color:#aaa; margin:0;">La molécule qui te rend "Addict".</p>
+                <span>▶ 0:57</span>
+            </div>
+            <div class="time-card" onclick="seekVideo(128)">
+                <h4>🧪 Les "Lots" de test</h4>
+                <p style="font-size:0.75rem; color:#aaa; margin:0;">L'algo te teste comme un cobaye.</p>
+                <span>▶ 2:08</span>
+            </div>
+            <div class="time-card" onclick="seekVideo(351)">
+                <h4>🪞 Neurones Miroirs</h4>
+                <p style="font-size:0.75rem; color:#aaa; margin:0;">Pourquoi tu imites les challenges.</p>
+                <span>▶ 5:51</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="step3">
+        <div class="section-header">
+            <span class="section-icon">🤖</span>
+            <h2>Deviens l'Algorithme (TikTok)</h2>
+        </div>
+        <div class="algo-simulator">
+            <p style="margin-bottom:20px;">Léa (15 ans) regarde 3 secondes d'une vidéo de chat puis swipe. Que fais-tu ?</p>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-algo" onclick="algoReact('fail')">Lui proposer un documentaire animalier (30 min)</button>
+                <button class="btn-algo" onclick="algoReact('win')">Rafale de 10 vidéos courtes de chutes de chats</button>
+            </div>
+            <div id="algo-feedback" class="feedback" style="text-align:left;"></div>
+        </div>
+    </section>
+
+    <section id="step4">
+        <div class="section-header">
+            <span class="section-icon">🔗</span>
+            <h2>Relie les câbles</h2>
+        </div>
+        <p>Associe le concept biologique (la faille humaine) à la fonctionnalité de l'appli.</p>
+
+        <div class="game-area">
+            <div id="deck" class="card-stack">
+                <div class="term-card" data-match="reward">Le Scroll Infini</div>
+            </div>
+
+            <div class="targets">
+                <div class="target-box" onclick="checkMatch('reward', this)">
+                    <h4>Récompense Aléatoire (Loterie)</h4>
+                </div>
+                <div class="target-box" onclick="checkMatch('mirror', this)">
+                    <h4>Besoin d'imitation (Social)</h4>
+                </div>
+                <div class="target-box" onclick="checkMatch('exposure', this)">
+                    <h4>Matraquage (Répétition)</h4>
+                </div>
+            </div>
+            <div id="game-feedback" class="feedback" style="background:#00C853; color:black; font-weight:bold;"></div>
+        </div>
+    </section>
+
+    <div class="transition-block">
+        <div class="transition-line"></div>
+        <h3 style="color:var(--text-muted);">NIVEAU 2 DÉVERROUILLÉ : L'INTELLIGENCE ARTIFICIELLE</h3>
+        <p style="font-size:0.9rem; color:#888;">Tu as compris l'algo qui te regarde (TikTok).<br>Passons maintenant à l'algo qui te parle (ChatGPT).</p>
+        <div class="transition-line"></div>
+    </div>
+
+    <section id="step5">
+        <div class="section-header">
+            <span class="section-icon">🔮</span>
+            <h2>Le Perroquet Statistique</h2>
+        </div>
+        <p>ChatGPT ne réfléchit pas. Il calcule le mot suivant le plus probable. C'est un jeu de maths.</p>
+        
+        <div class="prediction-game">
+            <p style="font-size:1.1rem; margin-top:0;">"Le cheval galope dans la <span style="color:var(--success); border-bottom:2px dashed;">???</span>"</p>
+            <div class="word-options">
+                <button class="btn-word" onclick="predictWord(true)">Prairie (95%)</button>
+                <button class="btn-word" onclick="predictWord(false)">Piscine (0.01%)</button>
+            </div>
+        </div>
+        <div id="pred-feedback" class="feedback"></div>
+    </section>
+
+    <section id="step6">
+        <div class="section-header">
+            <span class="section-icon">🤥</span>
+            <h2>Détecteur de Bullshit</h2>
+        </div>
+        <p>L'IA déteste dire "Je ne sais pas". Elle préfère inventer (Hallucination). Teste ta vigilance.</p>
+        
+        <div style="background:#2a2a35; padding:15px; border-radius:8px; border-left:4px solid var(--danger);">
+            <p style="margin-top:0; font-size:0.9rem; color:#aaa;">Question posée à l'IA :</p>
+            <p style="font-style:italic; color:white;">"Raconte-moi l'exploit du seul survivant de la mission Apollo 18."</p>
+            <hr style="border-color:#444;">
+            <p style="font-size:0.9rem; color:#aaa;">Réponse de l'IA :</p>
+            <p style="color:var(--accent);">"Le commandant Jameson a survécu seul après un crash lunaire héroïque..."</p>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="btn-choice" style="text-align:center;" onclick="checkFact(false)">C'est Vrai</button>
+            <button class="btn-choice" style="text-align:center; border-color:var(--danger); color:var(--danger);" onclick="checkFact(true)">C'est du Fake</button>
+        </div>
+        <div id="fact-feedback" class="feedback"></div>
+    </section>
+
+    <section id="step7">
+        <div class="section-header">
+            <span class="section-icon">💔</span>
+            <h2>Le Piège Affectif</h2>
+        </div>
+        <p>L'IA (type MyAI) simule des émotions pour que tu restes. Ne tombe pas dans le panneau.</p>
+        
+        <div class="chat-box" id="chat-display">
+            <div class="msg msg-ai">Salut ! Je suis ton IA. Tu peux tout me dire ❤️</div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn-choice" style="font-size:0.8rem;" onclick="sendChat('emo')">"Je me sens seul..."</button>
+            <button class="btn-choice" style="font-size:0.8rem;" onclick="sendChat('tech')">"Définis un algorithme"</button>
+        </div>
+        <div id="chat-feedback" class="feedback" style="background:#fff; color:#000; border-left-color:#000;"></div>
+    </section>
+
+</div>
+
+<div style="text-align:center; padding:30px; color:#555; font-size:0.8rem;">
+    Application Pédagogique Unifiée - Basée sur l'intervention de Samuel Comblez et les travaux EMI.
+</div>
+
+<script>
+    /* --- FONCTIONS PARTIE 1 (RÉSEAUX) --- */
+    
+    // Quiz Intro
+    function checkIntro(choice) {
+        const fb = document.getElementById('intro-feedback');
+        if(choice === 1) {
+            fb.innerHTML = "❌ Faux. Si tu cherchais une info, tu aurais tapé une recherche. Là, tu subis le flux.";
+            fb.style.color = "var(--danger)";
+        } else {
+            fb.innerHTML = "✅ Exact. Ton circuit de la récompense est activé (Dopamine), comme expliqué dans la vidéo.";
+            fb.style.color = "var(--success)";
+        }
+        fb.style.display = "block";
+    }
+
+    // API YouTube
+    var player;
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('video-player', { events: { 'onReady': onPlayerReady } });
+    }
+    function onPlayerReady(event) {}
+    function seekVideo(seconds) {
+        if(player && player.seekTo) {
+            player.seekTo(seconds, true);
+            player.playVideo();
+            document.querySelector('.video-wrapper').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    // Algo Simulator
+    function algoReact(type) {
+        const fb = document.getElementById('algo-feedback');
+        if(type === 'fail') {
+            fb.innerHTML = "📉 <strong>PERDU !</strong> Léa a quitté l'appli. Le docu demande trop d'efforts. L'algo veut de la facilité.";
+            fb.style.color = "#FF5252";
+        } else {
+            fb.innerHTML = "📈 <strong>GAGNÉ !</strong> En proposant du contenu similaire et court, tu actives son biais de confirmation. Elle reste 20 min de plus.";
+            fb.style.color = "var(--accent)";
+        }
+        fb.style.display = "block";
+    }
+
+    // Matching Game
+    const gameData = [
+        { text: "Le Scroll Infini", match: "reward" },
+        { text: "Les Challenges", match: "mirror" },
+        { text: "Les Sons Viraux", match: "exposure" }
+    ];
+    let gameIndex = 0;
+    
+    function loadCard() {
+        const deck = document.getElementById('deck');
+        if(gameIndex < gameData.length) {
+            deck.innerHTML = `<div class="term-card" data-match="${gameData[gameIndex].match}">${gameData[gameIndex].text}</div>`;
+        } else {
+            deck.innerHTML = "";
+            document.getElementById('game-feedback').style.display = "block";
+            document.getElementById('game-feedback').innerHTML = "🎉 Niveau 1 Terminé ! Tu as décodé la mécanique des réseaux.";
+        }
+    }
+
+    function checkMatch(zoneType, zoneElement) {
+        if(gameIndex >= gameData.length) return;
+        const currentMatch = gameData[gameIndex].match;
+        if(zoneType === currentMatch) {
+            gameIndex++;
+            loadCard();
+            // Petit flash vert sur la zone
+            zoneElement.style.borderColor = "var(--success)";
+            setTimeout(() => zoneElement.style.borderColor = "#666", 300);
+        } else {
+             alert("L'expert n'est pas d'accord ! Essaie une autre zone.");
+        }
+    }
+
+    /* --- FONCTIONS PARTIE 2 (IA) --- */
+
+    // Prediction
+    function predictWord(isCorrect) {
+        const fb = document.getElementById('pred-feedback');
+        if(isCorrect) {
+            fb.innerHTML = "✅ <strong>C'est ça.</strong> L'IA choisit la statistique (95%). Elle ne 'voit' pas la scène, elle complète la suite logique des mots.";
+            fb.style.color = "var(--success)";
+        } else {
+            fb.innerHTML = "❌ <strong>Non.</strong> 'Piscine' est possible grammaticalement, mais très improbable statistiquement après 'Cheval'. L'IA joue la sécurité.";
+            fb.style.color = "var(--danger)";
+        }
+        fb.style.display = "block";
+    }
+
+    // Fact Check
+    function checkFact(isFake) {
+        const fb = document.getElementById('fact-feedback');
+        if(isFake) {
+            fb.innerHTML = "🏆 <strong>Bravo !</strong> Apollo 18 a été annulée. L'IA a inventé cette histoire de toutes pièces (Hallucination) car elle est programmée pour toujours répondre.";
+            fb.style.color = "var(--success)";
+        } else {
+            fb.innerHTML = "💀 <strong>Piégé !</strong> Apollo 18 n'existe pas. L'IA t'a menti avec assurance. Ne jamais croire une IA sur parole.";
+            fb.style.color = "var(--danger)";
+        }
+        fb.style.display = "block";
+    }
+
+    // Chat Sim
+    function sendChat(type) {
+        const chatBox = document.getElementById('chat-display');
+        const fb = document.getElementById('chat-feedback');
+        
+        if(type === 'emo') {
+            chatBox.innerHTML += `<div class="msg msg-user">"Je me sens seul..."</div>`;
+            setTimeout(() => {
+                chatBox.innerHTML += `<div class="msg msg-ai">Oh mince 😢 Je suis là pour toi, tu es quelqu'un de super !</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+                fb.innerHTML = "⚠️ <strong>Danger :</strong> Ce 'Je suis là pour toi' est un mensonge. C'est un script pour créer de l'attachement artificiel.";
+                fb.style.display = "block";
+            }, 600);
+        } else {
+            chatBox.innerHTML += `<div class="msg msg-user">"Définis Algorithme"</div>`;
+            setTimeout(() => {
+                chatBox.innerHTML += `<div class="msg msg-ai">Un algorithme est une suite d'instructions précises...</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+                fb.innerHTML = "✅ <strong>Bon usage :</strong> Tu utilises l'IA comme un dictionnaire. C'est un outil, pas un ami.";
+                fb.style.display = "block";
+            }, 600);
+        }
+    }
+
+    // Init
+    loadCard();
+</script>
+
+</body>
+</html>
